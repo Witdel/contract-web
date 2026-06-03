@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Developer Agreement</title>
+
+<link href="https://fonts.googleapis.com/css2?family=TH+Sarabun+PSK:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    font-family: 'TH Sarabun PSK', Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    font-size: 22px;
+}
+
+.container {
+    width: 1000px;
+    margin: auto;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+canvas {
+    background: white;
+    border: 2px solid #444;
+    touch-action: none;
+}
+
+button {
+    font-family: 'TH Sarabun PSK', sans-serif;
+    font-size: 22px;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+#export { background:#00c853; color:white; }
+#clear { background:#ff3d00; color:white; }
+
+pre {
+    text-align: left;
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📄 Developer Agreement (A4 Contract)</h2>
+
+<pre id="contract">
+═══════════════════════════════════════
+           สัญญาการพัฒนาเกม
+═══════════════════════════════════════
+
+ผู้พัฒนา: Witdel  
+ผู้สมัคร: ผู้ลงนามในเอกสารนี้
+
+1. วัตถุประสงค์
+กำหนดขอบเขตงานการพัฒนาเกม Roblox
+
+2. ขอบเขตงาน
+- เขียนสคริปต์ระบบเกม
+- แก้บัค
+- ปรับปรุงระบบ
+- พัฒนา feature
+
+3. ข้อห้าม
+- ห้ามใช้ Free Model เป็น core
+- ห้าม backdoor
+- ห้าม malware
+- ห้าม bypass ระบบ
+
+4. คุณภาพงาน
+- ต้องทำงานได้จริง
+- debug ได้
+- ไม่มี silent error
+
+5. การตรวจงาน
+- ตรวจโค้ดได้ทั้งหมด
+- core free model = fail
+
+6. การยุติสัญญา
+- malware = ยกเลิก
+- backdoor = ยกเลิก
+- free model core = ยกเลิก
+
+7. การยืนยัน
+ผู้สมัครยอมรับทั้งหมด
+═══════════════════════════════════════
+</pre>
+
+<p>✍️ เซ็นชื่อด้านล่าง</p>
+
+<canvas id="pad" width="800" height="200"></canvas><br>
+
+<button id="clear">ล้างลายเซ็น</button>
+<button id="export">Export PNG</button>
+
+</div>
+
+<script>
+const canvasEl = document.getElementById("pad");
+const ctxSig = canvasEl.getContext("2d");
+
+let drawing = false;
+
+function getPos(e){
+    const r = canvasEl.getBoundingClientRect();
+    if(e.touches){
+        return {
+            x: e.touches[0].clientX - r.left,
+            y: e.touches[0].clientY - r.top
+        };
+    }
+    return { x: e.offsetX, y: e.offsetY };
+}
+
+function start(e){
+    drawing = true;
+    ctxSig.beginPath();
+    const p = getPos(e);
+    ctxSig.moveTo(p.x, p.y);
+}
+
+function draw(e){
+    if(!drawing) return;
+    const p = getPos(e);
+
+    ctxSig.lineWidth = 3;
+    ctxSig.lineCap = "round";
+    ctxSig.strokeStyle = "#000";
+
+    ctxSig.lineTo(p.x, p.y);
+    ctxSig.stroke();
+}
+
+function stop(){
+    drawing = false;
+    ctxSig.beginPath();
+}
+
+canvasEl.addEventListener("mousedown", start);
+canvasEl.addEventListener("mousemove", draw);
+canvasEl.addEventListener("mouseup", stop);
+canvasEl.addEventListener("mouseleave", stop);
+
+canvasEl.addEventListener("touchstart", start);
+canvasEl.addEventListener("touchmove", draw);
+canvasEl.addEventListener("touchend", stop);
+
+document.getElementById("clear").onclick = () => {
+    ctxSig.clearRect(0,0,canvasEl.width,canvasEl.height);
+    ctxSig.beginPath();
+};
+
+document.getElementById("export").onclick = () => {
+
+    const textLines = document.getElementById("contract").innerText.split("\n");
+
+    const W = 1240;
+    const H = 1754;
+
+    const margin = 120;
+    const maxWidth = W - margin * 2;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+
+    const ctx = canvas.getContext("2d");
+
+    // background
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle = "#000";
+
+    let y = 140;
+
+    // TITLE
+    ctx.font = "bold 40px 'TH Sarabun PSK', Arial";
+    const title = "สัญญาการพัฒนาเกม";
+    const tw = ctx.measureText(title).width;
+    ctx.fillText(title, (W - tw)/2, y);
+
+    y += 90;
+
+    ctx.font = "24px 'TH Sarabun PSK', Arial";
+
+    function drawLine(line){
+
+        const words = line.split(" ");
+        let current = "";
+
+        for(let i=0;i<words.length;i++){
+
+            let test = current + words[i] + " ";
+
+            if(ctx.measureText(test).width > maxWidth && i > 0){
+                ctx.fillText(current, margin, y);
+                current = words[i] + " ";
+                y += 38;
+            } else {
+                current = test;
+            }
+        }
+
+        ctx.fillText(current, margin, y);
+        y += 38;
+    }
+
+    for(let line of textLines){
+
+        if(line.trim() === ""){
+            y += 15;
+            continue;
+        }
+
+        if(line.includes("═══")) continue;
+
+        if(/^\d\./.test(line)){
+            ctx.font = "bold 26px 'TH Sarabun PSK', Arial";
+            ctx.fillText(line, margin, y);
+            y += 45;
+            ctx.font = "24px Arial";
+            continue;
+        }
+
+        drawLine(line);
+    }
+
+    const sigBoxH = 200;
+    const safeY = H - sigBoxH - 120;
+
+    if(y > safeY) y = safeY;
+
+    y += 60;
+
+    ctx.font = "26px 'TH Sarabun PSK', Arial";
+
+    const label = "ลายเซ็นผู้สมัคร";
+    const lw = ctx.measureText(label).width;
+
+    ctx.fillText(label, W - margin - lw, y);
+
+    y += 20;
+
+    const sigW = 350;
+    const sigH = 120;
+
+    const sigX = W - margin - sigW;
+    const sigY = y;
+
+    ctx.strokeRect(sigX, sigY, sigW, sigH);
+    ctx.drawImage(canvasEl, sigX, sigY, sigW, sigH);
+
+    // DOWNLOAD
+    const link = document.createElement("a");
+    link.download = "Developer_Contract_A4_FINAL.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+};
+</script>
+
+</body>
+</html>
